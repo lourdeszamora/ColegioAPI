@@ -18,9 +18,13 @@ namespace ColegioAPI.Controllers
             _repository = repository;
         }
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery]int page, [FromQuery] int pageSize)
         {
-            var ans  =  await _repository.GetAll();
+            if (page < 1 || pageSize < 1)
+            {
+                return BadRequest();
+            }
+            var ans  =  await _repository.GetAll(page,pageSize);
             return  Ok(ans);
         }
 
@@ -38,15 +42,25 @@ namespace ColegioAPI.Controllers
         [HttpPost(Name = "Post" )]
         public async Task<IActionResult> Post([FromBody] AlumnoDTO alumno)
         {
-            var ans = await _repository.Create(new Alumno
+            var alum = _repository.GetById(alumno.Id);
+            try
             {
-                Id = alumno.Id,
-                Nombre = alumno.Nombre,
-                Apellidos = alumno.Apellidos,
-                Genero = alumno.Genero,
-                FechaNacimiento = alumno.FechaNacimiento
-            });
-            return CreatedAtAction("Creacion de Alumno",ans);
+                var ans = await _repository.Create(new Alumno
+                {
+                    Id = alumno.Id,
+                    Nombre = alumno.Nombre,
+                    Apellidos = alumno.Apellidos,
+                    Genero = alumno.Genero,
+                    FechaNacimiento = alumno.FechaNacimiento
+                });
+                return CreatedAtAction("Post", ans);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+            
+            
         }
 
         [HttpPut("{id}")]
@@ -58,6 +72,7 @@ namespace ColegioAPI.Controllers
             }
 
             if (await _repository.GetById(id) is null)
+
             {
                 return NotFound();
             }

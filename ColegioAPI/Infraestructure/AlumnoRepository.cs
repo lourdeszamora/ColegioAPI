@@ -6,9 +6,13 @@ namespace ColegioAPI.Infraestructure
     public class AlumnoRepository(ColegioContext context)
     {
         private readonly ColegioContext _context=context;
-        public async Task<List<Alumno>> GetAll()
+        public async Task<List<Alumno>> GetAll(int page, int pageSize)
         {
-            return await _context.Alumnos.ToListAsync();
+            if (page == 1)
+            {
+                return await _context.Alumnos.Take(pageSize).ToListAsync();
+            }
+            return await _context.Alumnos.Skip(page -1 * pageSize).Take(pageSize).ToListAsync();
         }
 
         public async Task<Alumno?> GetById(string id)
@@ -18,6 +22,10 @@ namespace ColegioAPI.Infraestructure
 
         public async Task<Alumno> Create(Alumno alumno)
         {
+            if (await GetById(alumno.Id) is not null)
+            {
+                throw new Exception("El alumno ya esta inscrito");
+            }
             _context.Alumnos.Add(alumno);
             await _context.SaveChangesAsync();
             return alumno;
