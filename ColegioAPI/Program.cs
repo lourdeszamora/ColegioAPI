@@ -1,5 +1,6 @@
-using ColegioAPI.Infraestructure;
+﻿using ColegioAPI.Infraestructure;
 using Microsoft.EntityFrameworkCore;
+using ColegioAPI.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 

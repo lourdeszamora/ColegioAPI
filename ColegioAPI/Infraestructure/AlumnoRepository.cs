@@ -20,6 +20,28 @@ namespace ColegioAPI.Infraestructure
             return await _context.Alumnos.FindAsync(id);
         }
 
+        public async Task<AlumnoGrado?> GetGrado(string id)
+        {
+            return await _context.AlumnosGrados.FirstOrDefaultAsync(ag => ag.AlumnoId == id);
+        }
+
+        public async Task<AlumnoGrado> AddGrado(AlumnoGrado alumnoGrado)
+        {
+            var alumno = await GetById(alumnoGrado.AlumnoId);
+            if (alumno is null)
+            {
+                throw new Exception("Alumno no encontrado");
+            }
+            var grado = await _context.Grados.FindAsync(alumnoGrado.GradoId);
+            if (grado is null)
+            {
+                throw new Exception("Grado no encontrado");
+            }
+            _context.AlumnosGrados.Add(alumnoGrado);
+            await _context.SaveChangesAsync();
+            return alumnoGrado;
+        }
+
         public async Task<Alumno> Create(Alumno alumno)
         {
             if (await GetById(alumno.Id) is not null)

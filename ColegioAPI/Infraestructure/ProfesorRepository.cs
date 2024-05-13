@@ -12,9 +12,13 @@ namespace ColegioAPI.Infraestructure
             _context = context;
         }
 
-        public async Task<List<Profesor>> GetAll()
+        public async Task<List<Profesor>> GetAll(int page, int pageSize)
         {
-            return await _context.Profesores.ToListAsync();
+            if (page == 1)
+            {
+                return await _context.Profesores.Take(pageSize).ToListAsync();
+            }
+            return await _context.Profesores.Skip(page - 1 * pageSize).Take(pageSize).ToListAsync();
         }
 
         public async Task<Profesor?> GetById(string id)

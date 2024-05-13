@@ -39,6 +39,56 @@ namespace ColegioAPI.Controllers
             return Ok(ans);
         }
 
+        [HttpGet("{id}/grado")]
+        public async Task<IActionResult> GetGrados([FromRoute] string id)
+        {
+            var al = await _repository.GetById(id);
+            if (al is null)
+            {
+                return NotFound();
+            }
+
+            var ans = (await _repository.GetGrado(id));
+            if (ans is null)
+            {
+                return NotFound("El alumno no esta inscrito en un grado");
+            }
+            var alumnoGrado =  new AlumnoGradoDTO
+            {
+                Grado = new GradoDTO
+                {
+                    Id = ans.Grado.Id,
+                    Nombre = ans.Grado.Nombre,
+                    Profesor = ans.Grado.Profesor.Nombre
+                },
+                Seccion = ans.Seccion
+            };
+            return Ok(ans);
+        }
+
+        [HttpPost("{id}/grado")]
+        public async Task<IActionResult> PostGrado([FromRoute] string id, [FromBody] AlumnoGradoDTO alumnoGrado)
+        {
+
+            if (await _repository.GetById(id) is null)
+            {
+                return NotFound("No se ha encontrado el alumno");
+            }
+
+            if (await _repository.GetGrado(id) is not null)
+            {
+                return BadRequest("El alumno ya esta inscrito en un grado");
+            }
+
+            var ans = await _repository.AddGrado(new AlumnoGrado
+            {
+                AlumnoId = id,
+                GradoId = alumnoGrado.Grado.Id,
+                Seccion = alumnoGrado.Seccion
+            });
+            return CreatedAtAction("PostGrado", ans);
+        }
+
         [HttpPost(Name = "Post" )]
         public async Task<IActionResult> Post([FromBody] AlumnoDTO alumno)
         {
