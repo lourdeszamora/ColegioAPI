@@ -1,12 +1,11 @@
 ﻿using ColegioAPI.DTO;
 using ColegioAPI.Infraestructure;
 using ColegioAPI.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ColegioAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/profesores")]
     [ApiController]
     public class ProfesoresController : ControllerBase
     {
@@ -25,7 +24,14 @@ namespace ColegioAPI.Controllers
                 return BadRequest();
             }
             var ans = await _repository.GetAll(page, pageSize);
-            return Ok(ans);
+            var dtos = ans.Select(profesor => new ProfesorDTO()
+            {
+                Id = profesor.Id,
+                Nombre = profesor.Nombre,
+                Apellidos = profesor.Apellidos,
+                Genero = profesor.Genero
+            }).ToList();
+            return Ok(dtos);
         }
 
         [HttpGet("{id}")]
@@ -51,6 +57,10 @@ namespace ColegioAPI.Controllers
         public async Task<IActionResult> Post([FromBody] ProfesorDTO profesor)
         {
             var prof = await _repository.GetById(profesor.Id);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (prof is not null)
             {
                 return Conflict("Hay otro profesor registrado con esa identidad");
@@ -62,6 +72,13 @@ namespace ColegioAPI.Controllers
                 Apellidos = profesor.Apellidos,
                 Genero = profesor.Genero
             });
+            var dto = new ProfesorDTO()
+            {
+                Id = ans.Id,
+                Nombre = ans.Nombre,
+                Apellidos = ans.Apellidos,
+                Genero = ans.Genero
+            };
             return CreatedAtAction("Post",ans);
         }
 
@@ -72,6 +89,11 @@ namespace ColegioAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var prof = await _repository.GetById(id);
+            if (prof is null)
+            {
+                return NotFound("No se encontro el profesor");
+            }
             var ans = await _repository.Update( new Profesor()
             {
                 Id = id,
@@ -79,23 +101,34 @@ namespace ColegioAPI.Controllers
                 Apellidos = profesor.Apellidos,
                 Genero = profesor.Genero
             });
-            if (ans is null)
+            
+            var dto = new ProfesorDTO()
             {
-                return NotFound();
-            }
-            return Ok(ans);
+                Id = ans.Id,
+                Nombre = ans.Nombre,
+                Apellidos = ans.Apellidos,
+                Genero = ans.Genero
+            };
+            return Ok(dto);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] string id)
         {
-            var ans = _repository.GetById(id);
+            var ans = await _repository.GetById(id);
             if (ans is null)
             {
                 return NotFound();
             }
             await _repository.Delete(id);
-            return Ok(ans);
+            var dto = new ProfesorDTO()
+            {
+                Id = ans.Id,
+                Nombre = ans.Nombre,
+                Apellidos = ans.Apellidos,
+                Genero = ans.Genero
+            };
+            return Ok(dto);
         }   
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ColegioAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/alumnos")]
     [ApiController]
     public class AlumnosController : ControllerBase
     {
@@ -25,18 +25,34 @@ namespace ColegioAPI.Controllers
                 return BadRequest();
             }
             var ans  =  await _repository.GetAll(page,pageSize);
-            return  Ok(ans);
+            var dtos = ans.Select(a => new AlumnoDTO
+            {
+                Id = a.Id,
+                Nombre = a.Nombre,
+                Apellidos = a.Apellidos,
+                Genero = a.Genero,
+                FechaNacimiento = a.FechaNacimiento
+            });
+            return  Ok(dtos);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult>  Get([FromRoute]string id)
         {
             var ans = await _repository.GetById(id);
+            var dto = new AlumnoDTO
+            {
+                Id = ans.Id,
+                Nombre = ans.Nombre,
+                Apellidos = ans.Apellidos,
+                Genero = ans.Genero,
+                FechaNacimiento = ans.FechaNacimiento
+            };
             if (ans is null)
             {
                 return NotFound();
             }
-            return Ok(ans);
+            return Ok(dto);
         }
 
         [HttpGet("{id}/grado")]
@@ -59,16 +75,20 @@ namespace ColegioAPI.Controllers
                 {
                     Id = ans.Grado.Id,
                     Nombre = ans.Grado.Nombre,
-                    Profesor = ans.Grado.Profesor.Nombre
+                    ProfesorId = ans.Grado.ProfesorId
                 },
                 Seccion = ans.Seccion
             };
-            return Ok(ans);
+            return Ok(alumnoGrado);
         }
 
         [HttpPost("{id}/grado")]
         public async Task<IActionResult> PostGrado([FromRoute] string id, [FromBody] AlumnoGradoDTO alumnoGrado)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
             if (await _repository.GetById(id) is null)
             {
@@ -86,12 +106,26 @@ namespace ColegioAPI.Controllers
                 GradoId = alumnoGrado.Grado.Id,
                 Seccion = alumnoGrado.Seccion
             });
-            return CreatedAtAction("PostGrado", ans);
+            var dto = new AlumnoGradoDTO
+            {
+                Grado = new GradoDTO
+                {
+                    Id = ans.Grado.Id,
+                    Nombre = ans.Grado.Nombre,
+                    ProfesorId = ans.Grado.ProfesorId
+                },
+                Seccion = ans.Seccion
+            };
+            return CreatedAtAction("PostGrado", dto);
         }
 
         [HttpPost(Name = "Post" )]
         public async Task<IActionResult> Post([FromBody] AlumnoDTO alumno)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var alum = _repository.GetById(alumno.Id);
             try
             {
@@ -103,7 +137,15 @@ namespace ColegioAPI.Controllers
                     Genero = alumno.Genero,
                     FechaNacimiento = alumno.FechaNacimiento
                 });
-                return CreatedAtAction("Post", ans);
+                var dto = new AlumnoDTO
+                {
+                    Id = ans.Id,
+                    Nombre = ans.Nombre,
+                    Apellidos = ans.Apellidos,
+                    Genero = ans.Genero,
+                    FechaNacimiento = ans.FechaNacimiento
+                };
+                return CreatedAtAction("Post", dto);
             }
             catch (Exception e)
             {
@@ -118,7 +160,12 @@ namespace ColegioAPI.Controllers
         {
             if (id != alumno.Id)
             {
-                return BadRequest();
+                return BadRequest("No se puede actualizar el ID de registro");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
             }
 
             if (await _repository.GetById(id) is null)
@@ -134,7 +181,15 @@ namespace ColegioAPI.Controllers
                 Genero = alumno.Genero,
                 FechaNacimiento = alumno.FechaNacimiento
             });
-            return Ok(ans);
+            var dto = new AlumnoDTO
+            {
+                Id = ans.Id,
+                Nombre = ans.Nombre,
+                Apellidos = ans.Apellidos,
+                Genero = ans.Genero,
+                FechaNacimiento = ans.FechaNacimiento
+            };
+            return Ok(dto);
         }
 
         [HttpDelete("{id}")]

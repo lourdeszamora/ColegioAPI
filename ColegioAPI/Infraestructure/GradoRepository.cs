@@ -12,9 +12,13 @@ namespace ColegioAPI.Infraestructure
             _context = context;
         }
 
-        public async Task<IEnumerable<Grado>> GetAll()
+        public async Task<IEnumerable<Grado>> GetAll(int page, int pageSize)
         {
-            return await _context.Grados.ToListAsync();
+            if (page == 1)
+            {
+                return await _context.Grados.Take(pageSize).ToListAsync();
+            }
+            return await _context.Grados.Skip(page - 1 * pageSize).Take(pageSize).ToListAsync();
         }
 
         public async Task<Grado?> GetById(int id)
@@ -35,15 +39,16 @@ namespace ColegioAPI.Infraestructure
             return grado;
         }
 
-        public async Task Update(Grado grado)
+        public async Task<Grado> Update(Grado grado)
         {
             var g = await GetById(grado.Id);
             if (g is null)
             {
                 throw new Exception("Grado no encontrado");
-            }
+            } 
             _context.Grados.Update(grado);
             await _context.SaveChangesAsync();
+            return grado;
         }
 
         public async Task Delete(int id)
