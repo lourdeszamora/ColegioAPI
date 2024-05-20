@@ -35,7 +35,8 @@ namespace ColegioAPI.Infraestructure
 
         public async Task<Profesor> Update(Profesor profesor)
         {
-            var prof = await GetById(profesor.Id);
+            var prof = await _context.Profesores.FindAsync(profesor.Id);
+            _context.Entry(prof).State = EntityState.Detached;
             if (prof is null)
             {
                 throw new Exception("Profesor no encontrado");
