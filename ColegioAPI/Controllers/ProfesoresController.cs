@@ -1,4 +1,5 @@
-﻿using ColegioAPI.DTO;
+﻿using System.Web.Http.Cors;
+using ColegioAPI.DTO;
 using ColegioAPI.Infraestructure;
 using ColegioAPI.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ namespace ColegioAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<IActionResult> Get([FromQuery] int page, [FromQuery] int pageSize = 20)
         {
             if (page < 1 || pageSize < 1)
             {
