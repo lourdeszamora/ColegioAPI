@@ -60,6 +60,7 @@ namespace ColegioAPI.Infraestructure
             {
                 throw new Exception("Alumno no encontrado");
             }
+            _context.Entry(a).State = EntityState.Detached;
             _context.Alumnos.Update(alumno);
             await context.SaveChangesAsync();
             return alumno;
@@ -74,6 +75,11 @@ namespace ColegioAPI.Infraestructure
             }
             context.Alumnos.Remove(alumno);
             await context.SaveChangesAsync();
+        }
+
+        public async Task<int> Count()
+        {
+            return await _context.Alumnos.CountAsync();
         }
     }
 }

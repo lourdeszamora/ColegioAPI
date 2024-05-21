@@ -46,6 +46,7 @@ namespace ColegioAPI.Infraestructure
             {
                 throw new Exception("Grado no encontrado");
             } 
+            _context.Entry(g).State = EntityState.Detached;
             _context.Grados.Update(grado);
             await _context.SaveChangesAsync();
             return grado;
@@ -58,8 +59,14 @@ namespace ColegioAPI.Infraestructure
             {
                 throw new Exception("Grado no encontrado");
             }
+
             _context.Grados.Remove(gradoToDelete);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> Count()
+        {
+            return await _context.Grados.CountAsync();
         }
     }
 }

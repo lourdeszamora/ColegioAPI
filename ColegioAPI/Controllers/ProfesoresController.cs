@@ -32,7 +32,15 @@ namespace ColegioAPI.Controllers
                 Apellidos = profesor.Apellidos,
                 Genero = profesor.Genero
             }).ToList();
-            return Ok(dtos);
+            var count = await _repository.Count();
+            var paginable = new Paginable<ProfesorDTO>()
+            {
+                Page = page,
+                PageSize = pageSize,
+                Data = dtos,
+                Total = count
+            };
+            return Ok(paginable);
         }
 
         [HttpGet("{id}")]

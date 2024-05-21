@@ -33,7 +33,15 @@ namespace ColegioAPI.Controllers
                 Genero = a.Genero,
                 FechaNacimiento = a.FechaNacimiento
             });
-            return  Ok(dtos);
+            var count = await _repository.Count();
+            var paginable = new Paginable<AlumnoDTO>
+            {
+                Page = page,
+                PageSize = pageSize,
+                Data = dtos.ToList(),
+                Total = count
+            };
+            return  Ok(paginable);
         }
 
         [HttpGet("{id}")]

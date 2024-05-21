@@ -1,4 +1,4 @@
-﻿using ColegioAPI.Models;
+using ColegioAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ColegioAPI.Infraestructure
@@ -52,5 +52,10 @@ namespace ColegioAPI.Infraestructure
             _context.Profesores.Remove(profesorToDelete);
             await _context.SaveChangesAsync();
         }   
+
+        public async Task<int> Count()
+        {
+            return await _context.Profesores.CountAsync();
+        }
     }
 }

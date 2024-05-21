@@ -31,7 +31,15 @@ namespace ColegioAPI.Controllers
                 Nombre = grado.Nombre,
                 ProfesorId = grado.ProfesorId
             }).ToList();
-            return Ok(dtos);
+            var count = await _repository.Count();
+            var paginable = new Paginable<GradoDTO>()
+            {
+                Page = page,
+                PageSize = pageSize,
+                Data = dtos,
+                Total = count
+            };
+            return Ok(paginable);
         }
 
         [HttpGet("{id}")]
