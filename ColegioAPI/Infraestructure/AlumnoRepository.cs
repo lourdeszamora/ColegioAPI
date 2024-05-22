@@ -10,19 +10,20 @@ namespace ColegioAPI.Infraestructure
         {
             if (page == 1)
             {
-                return await _context.Alumnos.Take(pageSize).ToListAsync();
+                return await _context.Alumnos.AsNoTracking().Take(pageSize).ToListAsync();
             }
-            return await _context.Alumnos.Skip(page -1 * pageSize).Take(pageSize).ToListAsync();
+            return await _context.Alumnos.AsNoTracking().Skip(page -1 * pageSize).Take(pageSize).ToListAsync();
         }
 
         public async Task<Alumno?> GetById(string id)
         {
-            return await _context.Alumnos.FindAsync(id);
+            var ans= await _context.Alumnos.FindAsync(id);
+            return ans;
         }
 
         public async Task<AlumnoGrado?> GetGrado(string id)
         {
-            return await _context.AlumnosGrados.FirstOrDefaultAsync(ag => ag.AlumnoId == id);
+            return await _context.AlumnosGrados.Include(a => a.Grado).FirstOrDefaultAsync(ag => ag.AlumnoId == id);
         }
 
         public async Task<AlumnoGrado> AddGrado(AlumnoGrado alumnoGrado)
@@ -44,23 +45,18 @@ namespace ColegioAPI.Infraestructure
 
         public async Task<Alumno> Create(Alumno alumno)
         {
-            if (await GetById(alumno.Id) is not null)
-            {
-                throw new Exception("El alumno ya esta inscrito");
-            }
-            _context.Alumnos.Add(alumno);
+            await _context.Alumnos.AddAsync(alumno);
             await _context.SaveChangesAsync();
             return alumno;
         }
 
         public async Task<Alumno> Update(Alumno alumno)
         {
-            var a = await GetById(alumno.Id);
-            if (a is null)
+            var a = await _context.Alumnos.AnyAsync(al=> al.Id == alumno.Id);
+            if (!a)
             {
                 throw new Exception("Alumno no encontrado");
             }
-            _context.Entry(a).State = EntityState.Detached;
             _context.Alumnos.Update(alumno);
             await context.SaveChangesAsync();
             return alumno;
