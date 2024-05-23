@@ -111,7 +111,7 @@ namespace ColegioAPI.Controllers
             var ans = await _repository.AddGrado(new AlumnoGrado
             {
                 AlumnoId = id,
-                GradoId = alumnoGrado.Grado.Id,
+                GradoId = alumnoGrado.GradoId,
                 Seccion = alumnoGrado.Seccion
             });
             var dto = new AlumnoGradoDTO

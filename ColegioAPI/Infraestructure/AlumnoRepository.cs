@@ -18,6 +18,10 @@ namespace ColegioAPI.Infraestructure
         public async Task<Alumno?> GetById(string id)
         {
             var ans= await _context.Alumnos.FindAsync(id);
+            if (ans is not null)
+            {
+                _context.Entry(ans).State = EntityState.Detached;
+            }
             return ans;
         }
 
@@ -52,8 +56,9 @@ namespace ColegioAPI.Infraestructure
 
         public async Task<Alumno> Update(Alumno alumno)
         {
-            var a = await _context.Alumnos.AnyAsync(al=> al.Id == alumno.Id);
-            if (!a)
+            var a = await GetById(alumno.Id);
+            
+            if (a is null)
             {
                 throw new Exception("Alumno no encontrado");
             }
