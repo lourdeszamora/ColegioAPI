@@ -32,7 +32,7 @@ namespace ColegioAPI.Controllers
                 Apellidos = a.Apellidos,
                 Genero = a.Genero,
                 FechaNacimiento = a.FechaNacimiento
-            });
+            }).ToList();
             var count = await _repository.Count();
             var paginable = new Paginable<AlumnoDTO>
             {
@@ -127,40 +127,36 @@ namespace ColegioAPI.Controllers
             return CreatedAtAction("PostGrado", dto);
         }
 
-        [HttpPost(Name = "Post" )]
+        [HttpPost]
         public async Task<IActionResult> Post([FromBody] AlumnoDTO alumno)
         {
+            var alum = await _repository.GetById(alumno.Id);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var alum = _repository.GetById(alumno.Id);
-            try
+
+            if (alum is not null)
             {
-                var ans = await _repository.Create(new Alumno
-                {
-                    Id = alumno.Id,
-                    Nombre = alumno.Nombre,
-                    Apellidos = alumno.Apellidos,
-                    Genero = alumno.Genero,
-                    FechaNacimiento = alumno.FechaNacimiento
-                });
-                var dto = new AlumnoDTO
-                {
-                    Id = ans.Id,
-                    Nombre = ans.Nombre,
-                    Apellidos = ans.Apellidos,
-                    Genero = ans.Genero,
-                    FechaNacimiento = ans.FechaNacimiento
-                };
-                return CreatedAtAction("Post", dto);
+                return BadRequest("El alumno ya esta inscrito");
             }
-            catch (Exception e)
+            var ans = await _repository.Create(new Alumno
             {
-                return BadRequest(e.Message);
-            }
-            
-            
+                Id = alumno.Id,
+                Nombre = alumno.Nombre,
+                Apellidos = alumno.Apellidos,
+                Genero = alumno.Genero,
+                FechaNacimiento = alumno.FechaNacimiento
+            });
+            var dto = new AlumnoDTO
+            {
+                Id = ans.Id,
+                Nombre = ans.Nombre,
+                Apellidos = ans.Apellidos,
+                Genero = ans.Genero,
+                FechaNacimiento = ans.FechaNacimiento
+            };
+            return CreatedAtAction("Post", dto);
         }
 
         [HttpPut("{id}")]
